@@ -22,7 +22,7 @@ def recebeMensagens():                                      #Funcao que recebe m
 
 def escreve():                                              #funcao que que fica vendo se voce escreveu alguma coisa
     while (1):
-        mensagem = apelido + ": " +  input()                 #Recebe input e concatena seu apelido + input
+        mensagem = input()                 #Recebe input e concatena seu apelido + input
         cliente.send(mensagem.encode('ascii'))               #Envia mensagem para servidor
 
 recebe_thread = threading.Thread(target= recebeMensagens)   #inicia thread de recebimento de mensagem

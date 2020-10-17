@@ -10,24 +10,33 @@ serverSocket.listen()                       #Fica ouvindo a porta e espera algum
 
 clientes = []
 apelidos = []
+enderecos = []
+
+def formataMensagem(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORTA, E APELIDO E DPS MENSAGEM
+    index = clientes.index(cliente)
+    mensagemFinal = str(enderecos[index][0])+":"+str(enderecos[index][1])+"\~"+str(apelidos[index])+": "+mensagem
+    return mensagemFinal
 
 def broadcast(mensagem):                    #Funcao que envia uma mensagem para todos os clientes conectados!
     for cliente in clientes:                #Percorre vetor que contem todos os clientes
         cliente.send(mensagem)               #Manda mensagem para determinado cliente
 
-def handle(cliente):                            #Funcao que fica ouvindo se o cliente enviou uma mensagem
-    while (1):                                  #Loop infinito para ficar ouvindo o client
-            try:                                #tenta receber uma mensagem
-                mensagem = cliente.recv(1024)   #Tenta receber mensagem do client
-                broadcast(mensagem)
+def handle(cliente):                                        #Funcao que fica ouvindo se o cliente enviou uma mensagem
+    while (1):                                              #Loop infinito para ficar ouvindo o client
+            try:                                            #tenta receber uma mensagem
+                mensagem = cliente.recv(1024)               #Tenta receber mensagem do client
+                mensagem = formataMensagem(cliente,mensagem.decode('ascii'))
+                broadcast(mensagem.encode('ascii'))
             except:                                         #Caso nao consiga receber uma mensagem, faz algo
                 index =clientes.index(cliente)              #Se der erro no recebimento da mensagem, desconecta o cliente, recebe o indice do cliente q bugou
                 clientes.remove(cliente)                    #retira o cliente do vetor de clientes
-                cliente.close()                              #desconecta cliente
+                cliente.close()                             #desconecta cliente
                 apelido = apelidos[index]                   #recebe o nome de quem saiu, para printar para todos que ele saiu
+                endereco = enderecos[index]
                 desconectado = apelido + " saiu do chat"
                 broadcast(desconectado.encode('ascii'))
-                apelidos.remove(index)                      #Tira o Apelido do vetor de apelidos
+                apelidos.remove(apelido)                      #Tira o Apelido do vetor de apelidos
+                enderecos.remove(endereco)
                 break                                       #Quebra o loop
 
 def conexoes():                                         #Funcao que aceita conexoes novas
@@ -41,7 +50,8 @@ def conexoes():                                         #Funcao que aceita conex
         apelido=cliente.recv(1024).decode('ascii')       #recebe o apelido do cliente
         apelidos.append(apelido)                        #Salva o apelido na lista de apelidos
         clientes.append(cliente)                        #Salva cliente na lista de clientes
-
+        enderecos.append(endereco)
+        
         menConexao = "O apelido do cliente eh: " + apelido          
         print(menConexao)                                          #Printa o apelido do cliente recebido no servidor
         menConexao = apelido + " entrou no chat"                    
