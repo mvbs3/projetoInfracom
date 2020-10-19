@@ -1,32 +1,35 @@
 from socket import *
-import threading
+import _thread
 
 apelido = input("Escolha seu apelido: ")
-serverIp = '192.168.0.100'
+serverIp = gethostname()
 serverPort = 5555
 cliente = socket(AF_INET, SOCK_STREAM)   #cria um socket tcp cliente
 cliente.connect((serverIp, serverPort))  #se conecta a um  socket tcp servidor
 
 def recebeMensagens():                                      #Funcao que recebe mensagens do servidor e printa elas
     while (1):
-        try:
-            mensagem = cliente.recv(1024).decode('ascii')   #Tenta receber uma mensagem do servidor(trava o programa aqui)
-            if (mensagem == 'Apelido'):                     #Caso nao seja uma mensagem pedindo um Nick, printa a mensagem
-                cliente.send(apelido.encode('ascii'))
-            else:
-                print(mensagem)
-        except:
-            print("Ocorreu um erro")                        #Caso ocorra um erro, ele fecha o cliente e printa erro
-            cliente.close()
+        mensagem = cliente.recv(1024).decode('ascii')   #Tenta receber uma mensagem do servidor(trava o programa aqui)
+        if (mensagem == 'Apelido'):                     #Caso nao seja uma mensagem pedindo um Nick, printa a mensagem
+            cliente.send(apelido.encode('ascii'))
+        elif mensagem == 'close':                       #encerrar a conexao quando receber do server o sinal e sair da thread
+            print("saindo desse chat maravigold")
+            cliente.close()  
+            _thread.exit()
             break
+        else:
+            print(mensagem)
 
-def escreve():                                              #funcao que que fica vendo se voce escreveu alguma coisa
-    while (1):
-        mensagem = input()                 #Recebe input e concatena seu apelido + input
-        cliente.send(mensagem.encode('ascii'))               #Envia mensagem para servidor
+recebe_thread = _thread.start_new_thread(recebeMensagens, ())   #inicia thread de recebimento de mensagem
 
-recebe_thread = threading.Thread(target= recebeMensagens)   #inicia thread de recebimento de mensagem
-recebe_thread.start()
-
-escreve_thread = threading.Thread(target= escreve)          #inicia thread de envio de mensagem
-escreve_thread.start()
+while (1):
+    mensagem = input()                 #Recebe input e concatena seu apelido + input
+    if mensagem[0:9] == "send -all":
+        cliente.send(mensagem.encode('ascii'))
+    if mensagem == 'bye':
+        cliente.send(mensagem.encode('ascii'))
+        break
+    if mensagem == 'list':
+        cliente.send(mensagem.encode('ascii'))
+    if mensagem[0:10] == 'send -user':
+        cliente.send(mensagem.encode('ascii'))
