@@ -1,15 +1,16 @@
 from socket import *
 import _thread
 
+serverIp = gethostname()
+serverPort = 5555
+cliente = socket(AF_INET, SOCK_STREAM)   #cria um socket tcp cliente
+cliente.connect((serverIp, serverPort))  #se conecta a um  socket tcp servidor
+
 mensagem = ""
 apelido = input("Escolha seu apelido: ")
 while ' ' in apelido:
     print("escolha um apelido sem espaco")
     apelido = input("Escolha seu apelido: ")
-serverIp = gethostname()
-serverPort = 5555
-cliente = socket(AF_INET, SOCK_STREAM)   #cria um socket tcp cliente
-cliente.connect((serverIp, serverPort))  #se conecta a um  socket tcp servidor
 
 def recebeMensagens():  
     global apelido                                    #Funcao que recebe mensagens do servidor e printa elas
