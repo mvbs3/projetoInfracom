@@ -20,7 +20,7 @@ def formataMensagem(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORT
 def formataLista(apelidos): #enviar lista de users como uma string so
     msg = ""
     for user in apelidos:
-        msg = msg + user + " "
+        msg = msg + user + "\n"
     return msg
 
 
@@ -30,14 +30,26 @@ def broadcast(mensagem):                    #Funcao que envia uma mensagem para 
 
 def handle(cliente):                                        #Funcao que fica ouvindo se o cliente enviou uma mensagem
     while (1):                                           #tenta receber uma mensagem
-        mensagem = cliente.recv(1024)               #Tenta receber mensagem do client
-        mensagem = mensagem.decode('ascii')
+        try:
+            mensagem = cliente.recv(1024)               #Tenta receber mensagem do client
+            mensagem = mensagem.decode('ascii')
+        except:
+            print("errooou")
+            index = clientes.index(cliente)
+            apelido = apelidos[index]                   
+            endereco = enderecos[index]        #envia a todos que um user saiu do chat
+            apelidos.remove(apelido)                      #Tira o Apelido do vetor de apelidos
+            enderecos.remove(endereco)                  #tira endereço do vetor de endereços
+            clientes.remove(cliente)                    #retira o cliente do vetor de clientes
+            cliente.close()                             #fecha conexão do cliente
+            _thread.exit()
         if mensagem == 'bye':
             cliente.send('close'.encode('ascii'))       #envia sinal para o cliente fechar seu lado da conexão
             index = clientes.index(cliente)
             apelido = apelidos[index]                   
             endereco = enderecos[index]
             desconectado = apelido + " saiu do chat"
+            print(desconectado)
             broadcast(desconectado.encode('ascii'))        #envia a todos que um user saiu do chat
             apelidos.remove(apelido)                      #Tira o Apelido do vetor de apelidos
             enderecos.remove(endereco)                  #tira endereço do vetor de endereços
@@ -59,6 +71,7 @@ def handle(cliente):                                        #Funcao que fica ouv
                 meuCliente.send(formataMensagem(cliente,"".join(lista[3:])).encode('ascii'))
             else:                   #caso user nao exista, apenas retorna um erro para o cliente que a solicitou
                 cliente.send("Usuario nao existe".encode('ascii'))
+        
 
 def conexoes():                                         #Funcao que aceita conexoes novas
     while (1):                                          #CUIDADO, SE VC RODAR O SERVER, TERA QUE FECHAR PROCESSO PYTHON NO GERENCIADOR DE TAREFAS
@@ -68,6 +81,10 @@ def conexoes():                                         #Funcao que aceita conex
 
         cliente.send('Apelido'.encode('ascii'))         #Pergunta ao cliente qual seu Apelido
         apelido = cliente.recv(1024).decode('ascii')       #recebe o apelido do cliente
+        while apelido in apelidos:
+            cliente.send('Apelido2'.encode('ascii'))         #Pergunta ao cliente qual seu Apelido
+            apelido = cliente.recv(1024).decode('ascii')
+        cliente.send('ok'.encode('ascii')) 
         apelidos.append(apelido)                        #Salva o apelido na lista de apelidos
         clientes.append(cliente)                        #Salva cliente na lista de clientes
         enderecos.append(endereco)
