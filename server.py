@@ -17,11 +17,17 @@ def formataMensagem(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORT
     mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "\~" + str(apelidos[index]) + ": " + mensagem
     return mensagemFinal
 
+def formataMensagemPrivada(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORTA, E APELIDO E DPS MENSAGEM
+    index = clientes.index(cliente)
+    mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "\~" + str(apelidos[index]) + " (PM)" + ": " + mensagem
+    return mensagemFinal
+
 def formataLista(apelidos): #enviar lista de users como uma string so
     msg = ""
     for user in apelidos:
-        msg = msg + user + "\n"
-    return msg
+        msg = msg + user + ", "
+    msg = msg[:-2]
+    return "Usuarios: " + msg
 
 
 def broadcast(mensagem):                    #Funcao que envia uma mensagem para todos os clientes conectados!
@@ -63,12 +69,14 @@ def handle(cliente):                                        #Funcao que fica ouv
             mensagem = formataMensagem(cliente, mensagem[10:])
             broadcast(mensagem.encode('ascii'))
         #send -user usuario mensagem
+        #SONIKKU colocar sinalizacao de mensagem privada na mensagem privada
         elif mensagem[0:10] == "send -user":                #envia para o user (que existe) a mensagem privada
             lista = mensagem.split(' ')
             if lista[2] in apelidos:
                 index = apelidos.index(lista[2])
                 meuCliente = clientes[index]
-                meuCliente.send(formataMensagem(cliente,"".join(lista[3:])).encode('ascii'))
+                cliente.send(formataMensagemPrivada(cliente,"".join(lista[3:])).encode('ascii'))
+                meuCliente.send(formataMensagemPrivada(cliente,"".join(lista[3:])).encode('ascii'))
             else:                   #caso user nao exista, apenas retorna um erro para o cliente que a solicitou
                 cliente.send("Usuario nao existe".encode('ascii'))
         
