@@ -20,11 +20,17 @@ def formataMensagem(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORT
     mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "/~" + str(apelidos[index]) + ": " + mensagem + data_e_hora_em_texto
     return mensagemFinal
 
-def formataMensagemPrivada(cliente, mensagem): #FORMATA A MENSAGEM PARA DIZER O IP,PORTA, E APELIDO E DPS MENSAGEM
+def formataMensagemPrivada(cliente, mensagem, destino): #FORMATA A MENSAGEM PARA DIZER O IP,PORTA, E APELIDO E DPS MENSAGEM
     index = clientes.index(cliente)
     data_e_hora_atuais = datetime.now()
     data_e_hora_em_texto = data_e_hora_atuais.strftime(" %Hh%M %d/%m/%Y")
-    mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "/~" + str(apelidos[index]) + " (PM)" + ": " + mensagem + data_e_hora_em_texto
+    mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "/~" + str(apelidos[index])  + ": "+ "(PM to "+ destino +") "+ mensagem + data_e_hora_em_texto
+    return mensagemFinal
+def formataMensagemPrivadaDest(cliente, mensagem, destino): #FORMATA A MENSAGEM PARA DIZER O IP,PORTA, E APELIDO E DPS MENSAGEM
+    index = clientes.index(cliente)
+    data_e_hora_atuais = datetime.now()
+    data_e_hora_em_texto = data_e_hora_atuais.strftime(" %Hh%M %d/%m/%Y")
+    mensagemFinal = str(enderecos[index][0]) + ":" + str(enderecos[index][1]) + "/~" + str(apelidos[index])  + ": "+ "(PM to you) "+ mensagem + data_e_hora_em_texto
     return mensagemFinal
 
 def formataLista(apelidos): #enviar lista de users como uma string so
@@ -76,16 +82,16 @@ def handle(cliente):                                        #Funcao que fica ouv
         elif mensagem[0:9] == "send -all":                  #faz broadcast das mensagens publicas
             mensagem = formataMensagem(cliente, mensagem[10:])
             broadcast(mensagem.encode('ascii'))
-        #send -user usuario mensagem
        
         elif mensagem[0:10] == "send -user":                #envia para o user (que existe) a mensagem privada
             lista = mensagem.split(' ')
             if lista[2] in apelidos:
                 index = apelidos.index(lista[2])
-                meuCliente = clientes[index]
-                cliente.send(formataMensagemPrivada(cliente," ".join(lista[3:])).encode('ascii'))
-                meuCliente.send(formataMensagemPrivada(cliente," ".join(lista[3:])).encode('ascii'))
-            else:                   #caso user nao exista, apenas retorna um erro para o cliente que a solicitou
+                clienteDestino = clientes[index]
+                cliente.send(formataMensagemPrivada(cliente," ".join(lista[3:]),lista[2]).encode('ascii'))
+                clienteDestino.send(formataMensagemPrivadaDest(cliente," ".join(lista[3:]),lista[2]).encode('ascii'))
+            else:                   
+                #caso user nao exista, apenas retorna um erro para o cliente que a solicitou
                 cliente.send("Usuario nao existe".encode('ascii'))
         
 

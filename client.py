@@ -27,25 +27,13 @@ mensagem = ""
 while ' ' in apelido:
     event, values = sg.Window('Login',
                   [[sg.T('Digite seu apelido sem espaço', key='-TEXTO-'), sg.In(key='-ID-')],
-                  [sg.B('OK'), sg.B('Cancel') ]]).read(close=True)
+                  [sg.B('OK',bind_return_key=True), sg.B('Cancel') ]]).read(close=True)
     apelido = values['-ID-']
     if (event == "Cancel"):
         quit()
 
 #AQUI VC VAI SE CONECTAR!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 cliente.connect((serverIp, serverPort))  #se conecta a um  socket tcp servidor
-
-#Define o layout do chat linhas sao:
-#Usuario: apelido
-#Define uma caixa de texto de saida, mostra todas as mensagens do chat
-#Um input para vc escrever suas mensagens
-#botoes de Enviar, limpar tela e Sair
-layout = [[sg.Text("Usuario: " + apelido)],
-          [sg.Output(size=(100,20), key='-OUTPUT-')],
-          [sg.Input(key='-MSG-')],
-          [sg.Button('Enviar', bind_return_key=True), sg.Button('Clear'), sg.Button('Sair')]]
-#Inicia o chat
-window = sg.Window('Chat', layout)
 
 #RECEBE AAS MENSAGENS E PRINTA AS MENSAGENS NA TELA
 def recebeMensagens():  
@@ -68,9 +56,24 @@ while mensagem != 'ok':
     if mensagem == 'Apelido2':
         event, values = sg.Window('Login',
                   [[sg.T('Apelido ja escolhido, escolha outro.'), sg.In(key='-ID-')],
-                  [sg.B('OK'), sg.B('Cancel') ]]).read(close=True)
+                  [sg.B('OK',bind_return_key=True), sg.B('Cancel') ]]).read(close=True)
+        if (event == "Cancel"):
+            quit()
         apelido = values['-ID-']
         cliente.send(apelido.encode('ascii'))
+
+#Define o layout do chat linhas sao:
+#Usuario: apelido
+#Define uma caixa de texto de saida, mostra todas as mensagens do chat
+#Um input para vc escrever suas mensagens
+#botoes de Enviar, limpar tela e Sair
+layout = [[sg.Text("Usuario: " + apelido)],
+          [sg.Output(size=(100,20), key='-OUTPUT-')],
+          [sg.Input(key='-MSG-')],
+          [sg.Button('Enviar', bind_return_key=True), sg.Button('Clear'), sg.Button('Sair')]]
+
+#Inicia o chat
+window = sg.Window('Chat', layout)
 
 recebe_thread = _thread.start_new_thread(recebeMensagens, ())   #inicia thread de recebimento de mensagem
 
