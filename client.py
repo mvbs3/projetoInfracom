@@ -3,7 +3,6 @@ import PySimpleGUI as sg
 import _thread
 
 sg.theme('BluePurple')
-#serverIp = values['-ID-']
 serverPort = 5555
 cliente = socket(AF_INET, SOCK_STREAM)   #cria um socket tcp cliente
 
@@ -60,6 +59,13 @@ while mensagem != 'ok':
         if (event == "Cancel"):
             quit()
         apelido = values['-ID-']
+        while ' ' in apelido:
+            event, values = sg.Window('Login',
+                  [[sg.T('Digite seu apelido sem espaço', key='-TEXTO-'), sg.In(key='-ID-')],
+                  [sg.B('OK',bind_return_key=True), sg.B('Cancel') ]]).read(close=True)
+            apelido = values['-ID-']
+            if (event == "Cancel"):
+                quit()
         cliente.send(apelido.encode('ascii'))
 
 #Define o layout do chat linhas sao:

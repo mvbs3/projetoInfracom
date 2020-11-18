@@ -2,11 +2,11 @@ from socket import *
 import _thread
 from datetime import datetime
 
-serverName = "127.0.0.1" #local host
+serverName = "0.0.0.0" #local host
 serverPort = 5555  
 
 serverSocket = socket(AF_INET, SOCK_STREAM) #CRIA SOCKET TCP DO SERVER
-serverSocket.bind(("",serverPort)) #Associa um ip e um numero de porta ao socket do server 
+serverSocket.bind((serverName,serverPort)) #Associa um ip e um numero de porta ao socket do server 
 serverSocket.listen()                       #Fica ouvindo a porta e espera algum cliente se conectar, se colocar um numero no parametro, ele espera esse numero de clientes
 
 clientes = []
